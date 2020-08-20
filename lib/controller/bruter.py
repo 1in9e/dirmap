@@ -424,6 +424,25 @@ def scanModeHandler():
         outputscreen.error("[-] You have to select at least one mode , plz check mode config")
         sys.exit()
 
+# Add by lin9e in 2020-8-20 from BBScan
+# 用于解码HTTP响应内容
+def decode_response_text(txt, charset=None):
+    if charset:
+        try:
+            return txt.decode(charset)
+        except Exception as e:
+            pass
+    for _ in ['UTF-8', 'GBK', 'GB2312', 'iso-8859-1', 'big5']:
+        try:
+            return txt.decode(_)
+        except Exception as e:
+            pass
+    try:
+        return txt.decode('ascii', 'ignore')
+    except Exception as e:
+        pass
+    raise Exception('Fail to decode response Text')
+
 def responseHandler(response):
     '''
     @description: 处理响应结果
@@ -444,11 +463,20 @@ def responseHandler(response):
         if hashlib.md5(response.content).hexdigest() in conf.autodiscriminator_md5:
             return
 
+    # Add By lin9e in 2020-8-20
+    # 添加页面标题显示
+    html_doc = decode_response_text(response.content)
+    # print(html_doc)
+    m = re.search('<title>(.*?)</title>', html_doc)
+    title = m.group(1) if m else ''
+
     #自定义状态码显示
     if response.status_code in conf.response_status_code:
         msg = '[{}]'.format(str(response.status_code))
         if conf.response_header_content_type:
             msg += '[{}]'.format(response.headers.get('content-type'))
+        if title:
+            msg += '[{}]'.format(str(title))
         if conf.response_size:
             msg += '[{}] '.format(str(size))
         msg += response.url
