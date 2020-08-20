@@ -74,6 +74,19 @@ def saveResults(domain,msg):
         else:
             result_file.write(msg+'\n')
 
+# add by lin9e in 2020-8-20 
+# 结果加入mongodb函数
+# src_name, msg
+def saveResultsMongo(src, msg):
+    '''
+    @description: 结果存入mongodb, 以"srcName"命名, url去重复
+    @param {src:srcName, msg:保存MongoDB的json格式文件}
+    @return: null
+    '''
+    pass
+
+
+
 def loadConf():
     '''
     @description: 加载扫描配置(以后将使用参数，而非从文件加载)
@@ -466,24 +479,24 @@ def responseHandler(response):
     # Add By lin9e in 2020-8-20
     # 添加页面标题显示
     html_doc = decode_response_text(response.content)
-    # print(html_doc)
     m = re.search('<title>(.*?)</title>', html_doc)
     title = m.group(1) if m else ''
 
     #自定义状态码显示
     if response.status_code in conf.response_status_code:
-        msg = '[{}]'.format(str(response.status_code))
+        msg = '{}]'.format(str(response.status_code))
         if conf.response_header_content_type:
             msg += '[{}]'.format(response.headers.get('content-type'))
         if title:
             msg += '[{}]'.format(str(title))
         if conf.response_size:
-            msg += '[{}] '.format(str(size))
+            msg += '[{}][ '.format(str(size))
         msg += response.url
         outputscreen.info('\r'+msg+' '*(th.console_width-len(msg)+1))
         #已去重复，结果保存。NOTE:此处使用response.url进行文件名构造，解决使用-iL参数时，不能按照域名来命名文件名的问题
         #使用replace()，替换`:`，修复window下不能创建有`:`的文件问题
         saveResults(urllib.parse.urlparse(response.url).netloc.replace(':','_'),msg)
+
     #关于递归扫描。响应在自定义状态码中时，添加判断是否进行递归扫描
     if response.status_code in conf.recursive_status_code:
         if conf.recursive_scan:

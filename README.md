@@ -1,5 +1,7 @@
 # My Dirmap
 
+> Dirmap是一款相对不错的批量化web path发现工具，实际使用过程中，发现对于Title有需求，在某些敏感后台、系统等的path下可直接通过Title直观地看出来；另外为了将结果融合到资产管理平台中，需要将其导入MongoDB进行统一管理，故做了一个简单的二次开发。
+
 ## 定制化需求
 1. 结果添加Title
 2. 结果修改为html格式
@@ -8,10 +10,16 @@
 
 ## Todo
 - 结果修改为HTML格式
-- 结果导入MongoDB
 
 
+## MongoDB统一管理
+新增`run_dirmap.py`即为MongoDB导入导出脚本，其中笔者数据库中分别存在两个库：
+- domain : 用于存放对应SRC domains，其中包含collection有：tsrc, asrc, bsrc 等，可认为是一个数据表，其中会包含这个公司的收集到的资产
+- domainDir : 用于存放对应SRC所有子域名对应Web的path, 去重标准为url(domain+path)
 
+![mongo](doc/mongo_test.png)
+
+> 需修改 `run_dirmap.py`中MongoDB相关配置参数
 
 
 
