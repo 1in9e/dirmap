@@ -45,29 +45,32 @@ def _getJson(domain, src_name):
     '''
     try:
         with open('output/'+domain+'.txt', 'r') as f:
-            for _ in f.readlines():
-                dic = _.split("][")
-                # print(dic)
-                if len(dic) == 5:
-                    http_status = dic[0]
-                    content_type = dic[1]
-                    title = dic[2]
-                    http_length = dic[3]
-                    dir_url = dic[4].strip()
-                elif len(dic) == 4:
-                    http_status = dic[0]
-                    content_type = dic[1]
-                    http_length = dic[2]
-                    dir_url = dic[3].strip()
-                    title = ''
-                result = {"domain":domain,"http_status":http_status,"content_type":content_type,"title":title,"http_length":http_length,"url":dir_url,"time":time.strftime('%Y-%m-%d',time.localtime())}
-                _domainDir(src_name, result, dir_url)
-                # return result,dir_url
+            # dirmap误报某些站点产生大量不存在的dir, 以30为界限确定是否读取写入mongo
+            if len(f.readlines()) < 30:
+                for _ in f.readlines():
+                    dic = _.split("][")
+                    # print(dic)
+                    if len(dic) == 5:
+                        http_status = dic[0]
+                        content_type = dic[1]
+                        title = dic[2]
+                        http_length = dic[3]
+                        dir_url = dic[4].strip()
+                    elif len(dic) == 4:
+                        http_status = dic[0]
+                        content_type = dic[1]
+                        http_length = dic[2]
+                        dir_url = dic[3].strip()
+                        title = ''
+                    result = {"domain":domain,"http_status":http_status,"content_type":content_type,"title":title,"http_length":http_length,"url":dir_url,"time":time.strftime('%Y-%m-%d',time.localtime())}
+                    _domainDir(src_name, result, dir_url)
+                    # return result,dir_url
     except Exception as e:
         print(e)
         # return ''
 
 def main(src_name):
+    print("Start {} Dirbustering...".format(src_name))
     collection = _mongo('domain', src_name)
     for i in collection.find({}):
         domain = i['domain'].strip()
@@ -75,24 +78,25 @@ def main(src_name):
         # fix bug#### url = url.scheme+'://'+url.netloc
         url = url.scheme + '://' + domain
         # print(url)
-        # os.system("python dirmap.py -t 50 -i {} -lcf".format(url))
+        os.system("python dirmap.py -t 50 -i {} -lcf".format(url))
         result = _getJson(domain, src_name)
 
 if __name__ == '__main__':
-	parser = argparse.ArgumentParser(prog='domainTodomaindir', usage='%(prog)s [options] [args] usage', description='domainTodomaindir: A tool for')
-	parser.add_argument("--src", dest="srcName", type=str, help="--src srcName, eg:asrc | MUST")
-	args = parser.parse_args()
-	srcName = args.srcName
-    # banner = r"""
-    #                             ______                     
-    #                             (, /    ) ,                 
-    #         ___   _____   _   ___ /    /    __ ___   _  __  
-    #         // (_(_) / (_(_/_(_)_/___ /__(_/ (_// (_(_(_/_)_
-    #                     .-/   (_/___ /               .-/    
-    #                 (_/                          (_/     
-    #                     Have fun. MongoDirmap root@ohlinge.cn
-    # """
-	if not srcName:
-		print(parser.format_help())
-	else:
-		main(srcName)
+    parser = argparse.ArgumentParser(prog='domainTodomaindir', usage='%(prog)s [options] [args] usage', description='domainTodomaindir: A tool for')
+    parser.add_argument("--src", dest="srcName", type=str, help="--src srcName, eg:asrc | MUST")
+    args = parser.parse_args()
+    srcName = args.srcName
+    banner = """
+                        ______                     
+                        (, /    ) ,                 
+    ___   _____   _   ___ /    /    __ ___   _  __  
+    // (_(_) / (_(_/_(_)_/___ /__(_/ (_// (_(_(_/_)_
+                .-/   (_/___ /               .-/    
+            (_/                          (_/     
+                Have fun. MongoDirmap root@ohlinge.cn
+    """
+    print(banner)
+    if not srcName:
+        print(parser.format_help())
+    else:
+        main(srcName)
