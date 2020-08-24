@@ -79,7 +79,7 @@ def main(src_name):
         # fix bug#### url = url.scheme+'://'+url.netloc
         url = url.scheme + '://' + domain
         # print(url)
-        # os.system("python dirmap.py -t 50 -i {} -lcf".format(url))
+        os.system("python dirmap.py -t 50 -i {} -lcf".format(url))
         result = _getJson(domain, src_name)
 
 if __name__ == '__main__':
