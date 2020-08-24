@@ -46,10 +46,11 @@ def _getJson(domain, src_name):
     try:
         with open('output/'+domain+'.txt', 'r') as f:
             # dirmap误报某些站点产生大量不存在的dir, 以30为界限确定是否读取写入mongo
-            if len(f.readlines()) < 30:
-                for _ in f.readlines():
+            text = f.readlines()
+            if len(text) <= 30:
+                for _ in text:
+                    # print(_)
                     dic = _.split("][")
-                    # print(dic)
                     if len(dic) == 5:
                         http_status = dic[0]
                         content_type = dic[1]
@@ -78,7 +79,7 @@ def main(src_name):
         # fix bug#### url = url.scheme+'://'+url.netloc
         url = url.scheme + '://' + domain
         # print(url)
-        os.system("python dirmap.py -t 50 -i {} -lcf".format(url))
+        # os.system("python dirmap.py -t 50 -i {} -lcf".format(url))
         result = _getJson(domain, src_name)
 
 if __name__ == '__main__':
